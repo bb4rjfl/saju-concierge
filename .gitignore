@@ -1,0 +1,19 @@
+node_modules/
+.env
+.env.local
+dist/
+*.log
+*.tsbuildinfo
+.DS_Store
+saju-concierge.zip
+사주.zip
+
+# stale root-level doc duplicates (canonical copies live in docs/)
+/01_kakao_playmcp_rules.md
+/06_working_agreement.md
+/07_decision_log.md
+/08_progress.md
+/09_kc_deploy_playbook.md
+
+# scratch
+_uxtest/

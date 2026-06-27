@@ -88,11 +88,7 @@ export const getYearlyFortune: ToolDef = {
     try {
       yf = computeYearlyFortune(chart, year);
     } catch (err) {
-      return fail(
-        "그 해의 운세를 계산하지 못했어요",
-        `${(err as Error).message}. 연도는 1900~2050년 사이로 알려주세요.`,
-        CHOICES,
-      );
+      return fail("그 해의 운세를 계산하지 못했어요", (err as Error).message, CHOICES);
     }
 
     const share = buildShareCard({

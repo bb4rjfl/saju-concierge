@@ -35,9 +35,12 @@ function renderName(r: NameReading): string {
     ? r.dominant.map((e) => OHAENG[e].personality).join(", ")
     : "골고루 퍼진 기운";
 
+  // 보완 예시 오행은 이름 기반으로 부족 오행 중 하나를 골라 다양화(항상 같은 화/빨강 반복 방지).
+  const nameSeed = [...r.name].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const exEl = r.lacking.length ? r.lacking[nameSeed % r.lacking.length]! : null;
   const lackLine =
-    r.lacking.length > 0 && r.lacking.length < 5
-      ? `\n🍀 **보완하면 좋은 기운**: ${r.lacking.map(elBadge).join("·")} — 예: ${OHAENG[r.lacking[0]!].color} 소품, ${OHAENG[r.lacking[0]!].food}`
+    exEl && r.lacking.length < 5
+      ? `\n🍀 **보완하면 좋은 기운**: ${r.lacking.map(elBadge).join("·")} — 예: ${OHAENG[exEl].color} 소품, ${OHAENG[exEl].food}`
       : "";
 
   return [

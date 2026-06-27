@@ -39,7 +39,7 @@
 1. **본선 Kakao Tools Widget용 "귀여운 UI" 비주얼 시안** — 카드 그래픽 목업(예선=텍스트 카드 유지, 본선 위젯 대비).
 2. **대화 예시 3개** + 대표 이미지(정적, 움짤 금지) 준비.
 3. R-DOC 동기화: docs/03(7툴 계약·공유카드·처방·날씨·프로필코드).
-4. 배포: public Git repo 초기화 → KC Git 소스 빌드 → Active → 배포 URL 정식 Inspector → PlayMCP 임시등록 → 심사요청(≤7/7).
+4. 배포(진행): ✅ **public repo push 완료 → https://github.com/bb4rjfl/saju-concierge** (branch `main`, 루트 `Dockerfile`). 다음 = **KC Git 소스 빌드**(playmcp.kakaocloud.io 콘솔, 사용자): Git URL=이 repo·branch `main`·Dockerfile 경로 `Dockerfile`·PAT 불필요(public) → Active → Endpoint URL → 정식 Inspector → PlayMCP 임시등록 → 대화예시 3 → 심사요청(≤7/7).
 5. 출품 전: 페르소나 멀티에이전트 시나리오 스윕(kpass식 7차원·적대적) + `/check`.
 
 ## 블로커 / 확인 필요

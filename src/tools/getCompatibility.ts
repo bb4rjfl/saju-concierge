@@ -124,7 +124,7 @@ export const getCompatibility: ToolDef = {
         `${chartA.animal}띠 ✕ ${chartB.animal}띠`,
         `${"♥".repeat(compat.hearts)}${"♡".repeat(5 - compat.hearts)} ${compat.headline}`,
       ],
-      tryPhrase: "나랑 친구 궁합 봐줘",
+      tryPhrase: `나랑 ${{ love: "연인 ", friend: "친구 ", work: "동료 ", any: "" }[compat.relationKey]}궁합 봐줘`,
     });
     return ok(renderCard(chartA, chartB, compat), CHOICES, share);
   },

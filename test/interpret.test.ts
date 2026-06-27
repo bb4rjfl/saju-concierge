@@ -50,10 +50,13 @@ describe("computeDailyKit (데일리 럭키 키트)", () => {
     expect(kit.donts.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("ties lucky element to the chart's lacking element (목 → 청록색)", () => {
-    const kit = computeDailyKit(chart, date);
-    expect(kit.favorableElement).toBe("목");
-    expect(kit.lucky.color).toBe("청록색");
+  it("daily lucky varies across days (not fixed per person) yet stays deterministic", () => {
+    const colors = new Set<string>();
+    for (let d = 1; d <= 20; d++) {
+      colors.add(computeDailyKit(chart, { year: 2026, month: 6, day: d }).lucky.color);
+    }
+    expect(colors.size).toBeGreaterThan(1); // 매일 같은 색이 아니다
+    expect(computeDailyKit(chart, date).lucky).toEqual(computeDailyKit(chart, date).lucky); // 같은 날은 동일
   });
 
   it("changes across days (not a constant)", () => {

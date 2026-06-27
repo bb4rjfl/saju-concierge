@@ -51,5 +51,9 @@ await call("findAuspiciousDate", {
   searchMonth: "2026-08",
 });
 
+// 적대적: 예전엔 SDK가 raw -32602를 던지던 입력들 → 이제 친절 카드여야 함
+await call("computeSajuChart", { year: 1995, month: 13, day: 5 });
+await call("findAuspiciousDate", { year: 1990, month: 5, day: 15, count: 99 });
+
 await client.close();
 console.log("\nSMOKE_OK");

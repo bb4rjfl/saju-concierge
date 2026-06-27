@@ -118,7 +118,9 @@ export const getTodayFortune: ToolDef = {
 
     const parsed = z.object(shape).parse(args);
     const today = koreaToday();
-    const target = parseDate(parsed.targetDate) ?? today;
+    const parsedTarget = parseDate(parsed.targetDate);
+    const badDate = parsed.targetDate !== undefined && parsedTarget === null;
+    const target = parsedTarget ?? today;
     const isToday = target.year === today.year && target.month === today.month && target.day === today.day;
 
     let kit: DailyKit;
@@ -145,6 +147,7 @@ export const getTodayFortune: ToolDef = {
       lines: [`${"★".repeat(kit.stars)}${"☆".repeat(5 - kit.stars)} ${kit.score}점 — ${short}`, `🍀 럭키 ${kit.lucky.color} · ${kit.lucky.item}`],
       tryPhrase: "오늘 내 운세 봐줘",
     });
-    return ok(renderKit(chart, kit, isToday, wxLine), CHOICES, share);
+    const note = badDate ? "_입력한 날짜 형식을 못 읽어 오늘 기준으로 보여드려요(YYYY-MM-DD)._\n\n" : "";
+    return ok(note + renderKit(chart, kit, isToday, wxLine), CHOICES, share);
   },
 };

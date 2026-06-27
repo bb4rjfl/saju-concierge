@@ -54,8 +54,15 @@ export function computeSajuType(chart: Chart): SajuTypeResult {
   const support = cats.비겁 + cats.인성 + 1;
   const drain = cats.식상 + cats.재성 + cats.관성;
   const gise: "강" | "유" = support >= drain ? "강" : "유";
-  // 성향(표현/절제): 식상 vs 관성
-  const seonghyang: "발" | "절" = cats.식상 >= cats.관성 ? "발" : "절";
+  // 성향(표현/절제): 1차 식상 vs 관성, 동률이면 발산(식상+재성) vs 수렴(관성+인성), 그래도 동률이면 음양으로.
+  let seonghyang: "발" | "절";
+  if (cats.식상 !== cats.관성) {
+    seonghyang = cats.식상 > cats.관성 ? "발" : "절";
+  } else {
+    const expand = cats.식상 + cats.재성;
+    const contract = cats.관성 + cats.인성;
+    seonghyang = expand !== contract ? (expand > contract ? "발" : "절") : yinYang === "양" ? "발" : "절";
+  }
   // 기온(확장/응축): 목+화 vs 금+수 (토는 중립)
   const warm = chart.elementCounts.목 + chart.elementCounts.화;
   const cool = chart.elementCounts.금 + chart.elementCounts.수;

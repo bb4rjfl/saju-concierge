@@ -55,7 +55,10 @@ function pad2(n: number): string {
 function sanitize(s?: string): string {
   if (!s) return "-";
   const cleaned = s.replace(/[|\r\n]/g, " ").trim().slice(0, 24);
-  return cleaned.length > 0 ? cleaned : "-";
+  if (cleaned.length === 0) return "-";
+  // 개인정보 방지: 주민번호·카드·전화 등 숫자열(4자리 이상 연속)이 섞이면 코드에 싣지 않음.
+  if (/\d{4,}/.test(cleaned)) return "-";
+  return cleaned;
 }
 
 /** 정규화된 프로필 → 사람이 읽을 수 있는 프로필 코드 문자열. */

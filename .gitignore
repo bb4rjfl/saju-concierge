@@ -15,5 +15,9 @@ saju-concierge.zip
 /08_progress.md
 /09_kc_deploy_playbook.md
 
-# scratch
+# scratch / temp test harnesses (root only — do NOT match src/tools/_shared.ts)
 _uxtest/
+/_*.mts
+/_qa.*
+/_scen.*
+*.tmp

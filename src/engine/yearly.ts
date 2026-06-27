@@ -5,7 +5,7 @@
  * 주: 대운(大運)은 v1 범위 밖(양남음녀 순역·대운수 계산 필요) — 세운 기준 개략만 제공하고
  * description도 그에 맞춘다(없는 기능 광고 금지). 추후 대운 보강 가능.
  */
-import { calculateSaju } from "@fullstackfamily/manseryeok";
+import { calculateSaju, isSupportedYear, getSupportedRange } from "@fullstackfamily/manseryeok";
 import type { Chart } from "./chart.js";
 import { ELEMENTS, STEMS, controls, categoryFor, type Element, type GodCategory } from "./elements.js";
 import { OHAENG } from "../data/ohaeng.js";
@@ -102,6 +102,10 @@ function hashStr(s: string): number {
 const SEASON_NAMES = ["봄", "여름", "가을", "겨울"];
 
 export function computeYearlyFortune(chart: Chart, year: number): YearlyFortune {
+  if (!isSupportedYear(year)) {
+    const r = getSupportedRange();
+    throw new RangeError(`연도는 ${r.min}~${r.max} 사이로 알려주세요`);
+  }
   // 세운 간지 = 해당 연도 간지. 입춘 이후로 안전하게 잡기 위해 연중(6/15) 기준.
   const saju = calculateSaju(year, 6, 15);
   const yearGanji = saju.yearPillar;

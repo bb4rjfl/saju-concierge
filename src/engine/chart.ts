@@ -55,32 +55,53 @@ export interface Chart {
   timeCorrected?: { hour: number; minute: number };
 }
 
-/** 사용자 입력(음력/시 모름 포함) → 정규화된 양력 프로필. */
+/** 숫자 필드 정규화+범위 검증. 어긋나면 한글 RangeError(호출부가 친절 카드로 변환). */
+function reqInt(v: number | undefined | null, label: string, min: number, max: number): number {
+  if (v === undefined || v === null || !Number.isFinite(v)) {
+    throw new RangeError(`${label}을(를) 숫자로 정확히 알려주세요`);
+  }
+  const n = Math.trunc(v);
+  if (n < min || n > max) throw new RangeError(`${label}은(는) ${min}~${max} 사이로 알려주세요`);
+  return n;
+}
+
+/** 사용자 입력(음력/시 모름 포함) → 정규화된 양력 프로필. 잘못된 값은 한글 RangeError. */
 export function birthToProfile(input: BirthInput): Profile {
-  let { year, month, day } = input;
+  if (input.year === undefined || input.year === null || !Number.isFinite(input.year)) {
+    throw new RangeError("출생 연도를 정확히 알려주세요");
+  }
+  let year = Math.trunc(input.year);
+  let month = reqInt(input.month, "월", 1, 12);
+  let day = reqInt(input.day, "일", 1, 31);
+
+  const timeUnknown =
+    input.unknownTime === true || input.hour === undefined || input.hour === null;
+  const hour = timeUnknown ? null : reqInt(input.hour, "시각", 0, 23);
+  const minute = hour === null ? null : input.minute === undefined || input.minute === null ? 0 : reqInt(input.minute, "분", 0, 59);
 
   if (input.isLunar) {
     if (!isSupportedYear(year)) {
       const r = getSupportedRange();
       throw new RangeError(`지원 연도(${r.min}~${r.max}) 밖이에요`);
     }
-    const s = lunarToSolar(year, month, day, input.isLeapMonth ?? false).solar;
-    year = s.year;
-    month = s.month;
-    day = s.day;
+    try {
+      const s = lunarToSolar(year, month, day, input.isLeapMonth ?? false).solar;
+      year = s.year;
+      month = s.month;
+      day = s.day;
+    } catch {
+      throw new RangeError("음력 날짜를 변환하지 못했어요. 음력 날짜가 맞는지 확인해 주세요.");
+    }
   }
-
-  const timeUnknown =
-    input.unknownTime === true || input.hour === undefined || input.hour === null;
 
   return {
     year,
     month,
     day,
-    hour: timeUnknown ? null : input.hour!,
-    minute: timeUnknown ? null : input.minute ?? 0,
+    hour,
+    minute,
     gender: input.gender,
-    longitude: input.longitude ?? 127,
+    longitude: Number.isFinite(input.longitude) ? (input.longitude as number) : 127,
     location: input.location,
     occupation: input.occupation,
   };
@@ -106,13 +127,18 @@ export function computeChart(profile: Profile): Chart {
     throw new RangeError(`지원 연도(${r.min}~${r.max}) 밖이에요`);
   }
 
-  const saju =
-    profile.hour === null
-      ? calculateSaju(profile.year, profile.month, profile.day) // 시 모름
-      : calculateSaju(profile.year, profile.month, profile.day, profile.hour, profile.minute ?? 0, {
-          longitude: profile.longitude,
-          applyTimeCorrection: true,
-        });
+  let saju;
+  try {
+    saju =
+      profile.hour === null
+        ? calculateSaju(profile.year, profile.month, profile.day) // 시 모름
+        : calculateSaju(profile.year, profile.month, profile.day, profile.hour, profile.minute ?? 0, {
+            longitude: profile.longitude,
+            applyTimeCorrection: true,
+          });
+  } catch {
+    throw new RangeError("존재하지 않는 날짜예요. 날짜(특히 '일')를 다시 확인해 주세요.");
+  }
 
   const year = makePillar(saju.yearPillar, saju.yearPillarHanja);
   const month = makePillar(saju.monthPillar, saju.monthPillarHanja);

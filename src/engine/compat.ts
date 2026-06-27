@@ -27,6 +27,8 @@ export interface Compatibility {
   score: number; // 40~99
   hearts: number; // 1~5
   headline: string;
+  /** 공유용 한 줄 캐치프레이즈(오행 비유). */
+  catchphrase: string;
   dmRelation: DmRel;
   dmNote: string;
   branchRelation: BranchRel;
@@ -107,11 +109,23 @@ function band(score: number): 0 | 1 | 2 {
   return score >= 80 ? 0 : score >= 62 ? 1 : 2;
 }
 
-const HEADLINES: [string, string, string] = [
-  "찰떡같이 잘 맞는 조합이에요 💞",
-  "맞춰가면 좋은 케미가 나는 사이",
-  "다른 매력이 부딪히는, 노력이 빛나는 사이",
+function pick<T>(arr: T[], seed: number): T {
+  return arr[seed % arr.length]!;
+}
+
+const HEADLINES: [string[], string[], string[]] = [
+  ["찰떡같이 잘 맞는 조합이에요 💞", "말 안 해도 통하는 케미 ✨", "함께라 더 빛나는 사이"],
+  ["맞춰가면 좋은 케미가 나는 사이", "알아갈수록 좋아지는 사이", "조금만 맞추면 찰떡인 사이"],
+  ["다른 매력이 부딪히는, 노력이 빛나는 사이", "밀당의 재미가 있는 사이", "서로 배우며 크는 사이"],
 ];
+
+const ELEMENT_TAG: Record<Element, string> = {
+  목: "새싹 같은",
+  화: "불꽃 같은",
+  토: "든든한 산 같은",
+  금: "단단한 쇠 같은",
+  수: "물처럼 유연한",
+};
 
 export function computeCompatibility(a: Chart, b: Chart, relation?: string): Compatibility {
   const rel = normRelation(relation);
@@ -136,7 +150,8 @@ export function computeCompatibility(a: Chart, b: Chart, relation?: string): Com
     relationLabel: rel.label,
     score,
     hearts,
-    headline: HEADLINES[band(score)],
+    headline: pick(HEADLINES[band(score)], seed),
+    catchphrase: `${ELEMENT_TAG[a.dayMaster.element]} ${a.animal}띠 ✕ ${ELEMENT_TAG[b.dayMaster.element]} ${b.animal}띠`,
     dmRelation: dr,
     dmNote: DM_NOTE[dr],
     branchRelation: br,

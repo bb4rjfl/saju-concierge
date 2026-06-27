@@ -13,9 +13,8 @@ import type { Chart } from "../engine/chart.js";
 
 const shape = {
   ...birthShape,
-  targetYear: z
+  targetYear: z.coerce
     .number()
-    .int()
     .optional()
     .describe("Year to read (e.g. 2026). Default = current year (KST). 1900–2050."),
 };
@@ -83,7 +82,7 @@ export const getYearlyFortune: ToolDef = {
     }
 
     const parsed = z.object(shape).parse(args);
-    const year = parsed.targetYear ?? koreaToday().year;
+    const year = Math.trunc(Number.isFinite(parsed.targetYear) ? (parsed.targetYear as number) : koreaToday().year);
 
     let yf: YearlyFortune;
     try {

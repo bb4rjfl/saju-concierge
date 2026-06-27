@@ -51,7 +51,8 @@ function choseongElement(ch: string): Element | null {
 }
 
 export function readName(name: string): NameReading {
-  const chars = [...name.trim()].filter((c) => c.trim().length > 0);
+  // 이름은 보통 짧다. 비정상적으로 긴 입력은 앞 10자만(응답 비대화·24k 근접 방지).
+  const chars = [...name.trim()].filter((c) => c.trim().length > 0).slice(0, 10);
   const syllables = chars.map((ch) => ({ ch, element: choseongElement(ch) }));
   const els = syllables.map((s) => s.element).filter((e): e is Element => e !== null);
 
@@ -90,5 +91,5 @@ export function readName(name: string): NameReading {
     flowLabel = "상생과 같은 기운이 어우러진 결";
   }
 
-  return { name: name.trim(), syllables, counts, dominant, lacking, flowLabel, flowKind };
+  return { name: chars.join(""), syllables, counts, dominant, lacking, flowLabel, flowKind };
 }

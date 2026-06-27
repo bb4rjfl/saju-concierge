@@ -20,7 +20,7 @@ const shape = {
     .string()
     .optional()
     .describe("Optional 'YYYY-MM' to search within that month (distinct from the birth 'month' field). Default: the next ~60 days from today (KST)."),
-  count: z.number().int().min(1).max(7).optional().describe("How many top dates to return (1–7, default 3)."),
+  count: z.coerce.number().optional().describe("How many top dates to return (1–7, default 3)."),
 };
 
 const CHOICES: Choice[] = [
@@ -47,8 +47,9 @@ function parseMonth(s?: string): { from: { year: number; month: number; day: num
 }
 
 function renderDates(chart: Chart, periodLabel: string, r: AuspiciousResult): string {
+  const titleLabel = r.purposeLabel === "좋은 날" ? "운수 좋은 날" : `${r.purposeLabel} 좋은 날`;
   const head = [
-    `# 🗓️ ${r.purposeLabel} 좋은 날 (Top ${r.days.length})`,
+    `# 🗓️ ${titleLabel} (Top ${r.days.length})`,
     `**${periodLabel}** · ${chart.animal}띠 · 일간 ${chart.dayMaster.stem}(${chart.dayMaster.element}) 기준`,
     "",
   ];
@@ -100,15 +101,18 @@ export const findAuspiciousDate: ToolDef = {
 
     const parsed = z.object(shape).parse(args);
     const today = koreaToday();
-    const range = parseMonth(parsed.searchMonth) ?? {
+    const parsedMonth = parseMonth(parsed.searchMonth);
+    const badMonth = parsed.searchMonth !== undefined && parsedMonth === null;
+    const range = parsedMonth ?? {
       from: addDays(today, 1),
       to: addDays(today, 60),
       label: "앞으로 약 60일",
     };
+    const count = Number.isFinite(parsed.count) ? Math.trunc(parsed.count as number) : 3;
 
     let result: AuspiciousResult;
     try {
-      result = computeAuspiciousDates(chart, parsed.purpose, range.from, range.to, parsed.count ?? 3);
+      result = computeAuspiciousDates(chart, parsed.purpose, range.from, range.to, count);
     } catch (err) {
       return fail(
         "택일을 계산하지 못했어요",
@@ -128,7 +132,7 @@ export const findAuspiciousDate: ToolDef = {
     const top = result.days[0]!;
     const share = buildShareCard({
       emoji: "🗓️",
-      title: `${result.purposeLabel} 좋은 날`,
+      title: result.purposeLabel === "좋은 날" ? "운수 좋은 날" : `${result.purposeLabel} 좋은 날`,
       lines: [
         `🥇 ${top.date.month}월 ${top.date.day}일 (${top.weekday}) ${top.dayGanji}일${top.sonEopsNeunNal ? " 🌟손없는날" : ""}`,
         `내 사주 기준 ${top.score}점`,
@@ -136,6 +140,7 @@ export const findAuspiciousDate: ToolDef = {
       tryPhrase: "이사 좋은 날 찾아줘",
     });
 
-    return ok(renderDates(chart, range.label, result), CHOICES, share);
+    const note = badMonth ? "_입력한 달 형식을 못 읽어 '앞으로 약 60일' 기준으로 보여드려요(YYYY-MM)._\n\n" : "";
+    return ok(note + renderDates(chart, range.label, result), CHOICES, share);
   },
 };

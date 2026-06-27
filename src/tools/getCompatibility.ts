@@ -49,6 +49,7 @@ function renderCard(a: Chart, b: Chart, c: Compatibility): string {
     "",
     `**궁합 ${hearts(c.hearts)} ${c.score}점**`,
     `> ${c.headline}`,
+    `_${c.catchphrase}_`,
     "",
     "🔗 **두 사람의 케미**",
     `- 일간 ${a.dayMaster.element} ↔ ${b.dayMaster.element}: **${c.dmRelation}** — ${c.dmNote}`,

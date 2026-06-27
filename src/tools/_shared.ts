@@ -16,21 +16,14 @@ export const birthShape = {
     .describe(
       "A previously issued Saju Concierge profile code (starts with 'SC1|'). If given, birth fields are ignored and the chart is recomputed from it — no re-entry needed.",
     ),
-  year: z
-    .number()
-    .int()
-    .optional()
-    .describe("Birth year, solar unless isLunar=true. 1900–2050. Required unless profileCode is given."),
-  month: z.number().int().min(1).max(12).optional().describe("Birth month 1–12."),
-  day: z.number().int().min(1).max(31).optional().describe("Birth day 1–31."),
-  hour: z
-    .number()
-    .int()
-    .min(0)
-    .max(23)
-    .optional()
-    .describe("Birth hour 0–23 (24h). Omit for the 'unknown time' (시 모름) mode."),
-  minute: z.number().int().min(0).max(59).optional().describe("Birth minute 0–59. Default 0."),
+  // 숫자 필드는 범위 제약을 스키마에 두지 않는다(어기면 SDK가 raw -32602를 던져 친절 카드가
+  // 무력화됨 — QA 발견). coerce로 문자열도 흡수하고, 실제 범위 검증은 엔진(birthToProfile)이
+  // 한글 RangeError로 처리한다.
+  year: z.coerce.number().optional().describe("Birth year (1900–2050), solar unless isLunar=true. Required unless profileCode is given."),
+  month: z.coerce.number().optional().describe("Birth month (1–12)."),
+  day: z.coerce.number().optional().describe("Birth day (1–31)."),
+  hour: z.coerce.number().optional().describe("Birth hour (0–23, 24h). Omit for the 'unknown time' (시 모름) mode."),
+  minute: z.coerce.number().optional().describe("Birth minute (0–59). Default 0."),
   isLunar: z.boolean().optional().describe("True if the date is a lunar (음력) date. Default false."),
   isLeapMonth: z.boolean().optional().describe("True if the lunar month is a leap month (윤달)."),
   unknownTime: z.boolean().optional().describe("Force 'unknown time' mode even if hour is provided."),
@@ -43,7 +36,7 @@ export const birthShape = {
     .string()
     .optional()
     .describe("Optional life context (e.g. 'student'/'office') carried for tailored daily advice."),
-  longitude: z.number().optional().describe("Longitude for true-solar-time correction. Default 127 (Seoul)."),
+  longitude: z.coerce.number().optional().describe("Longitude for true-solar-time correction. Default 127 (Seoul)."),
 };
 
 /**

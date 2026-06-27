@@ -95,12 +95,12 @@ function scoreDay(
     reasons.push("내 띠와 충");
   }
 
-  // 일간을 돕는 오행이면 가점
-  const favorable = chart.lacking[0] ?? generatorOf(chart.dayMaster.element);
+  // 일간을 돕는(생하는) 오행 = 인성. 부족 오행 보충과 별개로 가점.
+  const supportive = generatorOf(chart.dayMaster.element);
   if (chart.lacking.includes(stemEl)) {
     score += 8;
     reasons.push(`부족한 ${stemEl} 기운을 채워주는 날`);
-  } else if (stemEl === favorable) {
+  } else if (stemEl === supportive) {
     score += 5;
     reasons.push(`나를 돕는 ${stemEl} 기운의 날`);
   }

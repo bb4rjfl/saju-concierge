@@ -25,9 +25,11 @@
 7. `docs/06_working_agreement.md` — 작업 방식·코딩 규칙·정의(DoD)
 8. `docs/07_decision_log.md` — 결정 이력 (왜 이렇게 했나)
 9. `docs/08_progress.md` — 진행 상황·다음 할 일 (세션 간 연속성, SSOT)
-10. `docs/09_kc_deploy_playbook.md` — ⭐ KC 배포·실전 함정 (1번째 작품 경험 이식: 환경변수 없음·linux/amd64·등록절차)
+10. `docs/09_kc_deploy_playbook.md` — ⭐ KC 배포·실전 함정 (1번째 작품 경험 이식)
+11. `docs/10_demo_conversations.md` — PlayMCP 등록용 대화예시 3개
+12. ⭐ **`docs/11_handoff.md` — 최신 핸드오프(새 세션 진입점). 현재 상태·남은 일·함정·작업규칙 풍부판.**
 
-> 단순 작업이면 1·6만 읽어도 되지만, **기능 추가/변경 시 1~6을 모두** 확인한다.
+> **새 세션은 `docs/11_handoff.md` + `docs/08_progress.md`(SSOT)부터.** 단순 작업이면 1·6만, 기능 변경 시 1~6 모두 확인.
 
 ---
 

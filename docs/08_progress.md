@@ -25,22 +25,24 @@
 - [x] **(1) 콘텐츠 깊이 확장** — 데일리 문구 풀 시드변주(반복感↓), 16유형 연애/일/조언, 궁합 캐치프레이즈.
 - [x] **(2) 정확성·일관성 감수 합격** — 113매핑+충/합 12×12 오류 0건, 16유형 균형, 폴리시 2개(성향 타이브레이크·택일 인성가점).
 - [x] **(3) 적대적 QA 스윕(92케이스)+수정** — 🔴 raw -32602 누출 차단(숫자 제약을 스키마→엔진 친절검증으로), 엔진 영문에러 한글화, PII 프로필코드 차단, 이름 10자 캡, 잘못된 날짜/달 안내, 제목중복 수정. **테스트 56개·SDK경계 -32602 0건 확인.**
-- [ ] **배포 URL 대상 정식 MCP Inspector** 통과
-- [ ] Dockerfile(linux/amd64) + public repo + 라이선스 점검
-- [ ] KC **Git 소스 빌드**(키 없음 → 환경변수 입력 불필요) → Active → Endpoint URL
-- [ ] PlayMCP 임시등록 → 도구함 테스트 → 대화예시 3개
-- [ ] /check 통과 → 심사요청(≤7/7) → 전체공개 → 비즈폼 응모(≤7/14)
+- [x] **배포 URL 대상 SDK 스모크(=Inspector 동급)** 통과 (라이브 7툴·궁합 대칭·날씨)
+- [x] Dockerfile(linux/amd64) + public repo + 라이선스 점검(AGPL 0)
+- [x] **KC 배포 Active — 컨테이너 이미지 방식**(D-119, public ghcr+Actions), `saju-concierge` ID 768, Endpoint `https://saju-concierge.playmcp-endpoint.kakaocloud.io/mcp`
+- [x] **PlayMCP 임시등록 + 도구함 추가** (Tools 7 Online, 대화예시 3·대표이미지, Claude 커넥터로 호출 가능)
+- [x] /check 통과
+- [ ] **심사요청(≤7/7) → 전체공개 → 비즈폼 응모(≤7/14)** ← 남은 핵심
 
 ## KC 슬롯 현황
 - 계정당 **2대**. 1대 = **Korea Trip Concierge**(이미 KC 배포·Active, ID 638). 2대째 = **Saju Concierge**(이 프로젝트).
 - 둘 다 같은 카카오계정. 비즈폼은 최대 2개 MCP 제출 가능 → 두 작품 동시 응모.
 
 ## 지금 바로 다음 할 일 (Next)
-1. **본선 Kakao Tools Widget용 "귀여운 UI" 비주얼 시안** — 카드 그래픽 목업(예선=텍스트 카드 유지, 본선 위젯 대비).
-2. **대화 예시 3개** + 대표 이미지(정적, 움짤 금지) 준비.
-3. R-DOC 동기화: docs/03(7툴 계약·공유카드·처방·날씨·프로필코드).
-4. 배포(진행): ✅ **public repo push 완료 → https://github.com/bb4rjfl/saju-concierge** (branch `main`, 루트 `Dockerfile`). 다음 = **KC Git 소스 빌드**(playmcp.kakaocloud.io 콘솔, 사용자): Git URL=이 repo·branch `main`·Dockerfile 경로 `Dockerfile`·PAT 불필요(public) → Active → Endpoint URL → 정식 Inspector → PlayMCP 임시등록 → 대화예시 3 → 심사요청(≤7/7).
-5. 출품 전: 페르소나 멀티에이전트 시나리오 스윕(kpass식 7차원·적대적) + `/check`.
+> 상세·맥락은 **`docs/11_handoff.md`**(새 세션 진입점) 참조.
+1. PlayMCP 도구함/AI채팅(또는 Claude 커넥터)으로 **대화예시 3개 흐름·칩 여정·공유카드 최종 점검**.
+2. (코드 변경 있었으면) 재배포 후 라이브 health `build` sha=최신 확인. **7툴 셋 확정**(이후 툴 변경=재심사 트리거).
+3. **심사 요청**(playmcp.kakao.com, ≤7/7) → 승인 → **전체 공개** → 상세 URL 복사.
+4. **비즈폼 "Player 예선 참여"**(≤7/14, korea-trip+saju 2개 동시, 1회 제출). 비즈/사업자정보·서비스화면 별개 게이트 대비(kpass 2회 반려 경험).
+5. (본선/선택) Kakao Tools Widget(카드 시안=청사진)·데일리 콘텐츠 풀 확장·스케줄→카톡 발송 시연.
 
 ## 블로커 / 확인 필요
 - ✅ **응답 크기 24k 확정** — 노션 심사정책 원문 "Response 24k 초과 시 에러→반려". (20k설은 오정보.) 현재 응답 ~0.7k라 여유 충분.
@@ -65,3 +67,4 @@
 - 2026-06-27 (이어서8): **2차 종합 QA(다른 각도) + 궁합 대칭성 수정.** opus 분류기 불가로 서브에이전트 대신 직접 하니스 실행. ①882 시나리오(단발·입력모드·멀티턴24[코드재사용·띠일관100%]·공유→수신자 루프[7툴 CLOSED]·적대60)→실버그 0. ②2차 하니스(대칭성·입춘/자시 경계·윤달/윤일·같은날 50명 편차·다년연운·이름 된소리/받침·결정론·코드왕복)→ **🟡 궁합 비대칭 28/28 발견 → 시드 순서무관화 수정(D-118)**, 그 외(입춘 전환·윤일 2000/2004계산·1900/2001거부·결정론·왕복) 전부 정상. **빌드+57테스트(대칭성 회귀 추가) OK.** 신선도: 럭키 색 5종 변주·16유형 16종 균형·이름보완 분산·궁합 캐치 127/200.
 - 2026-06-27 (이어서9): **재배포 편의 위해 컨테이너 이미지+Actions 전환(D-119).** Git 소스 빌드는 중지→시작으로 새 커밋 반영 안 됨(라이브 74/72 확인). `.github/workflows/deploy-image.yml` 추가(main push→linux/amd64 빌드→public ghcr `ghcr.io/bb4rjfl/saju-concierge:latest`+sha, GITHUB_TOKEN만·시크릿 0, GIT_SHA 주입→헬스로 빌드확인). **절차**: ①Actions 초록 ②ghcr 패키지 public 1회 전환 ③KC 기존 git saju 삭제 ④'컨테이너 이미지' 재등록(host `ghcr.io`·image `bb4rjfl/saju-concierge`·tag `latest`·인증 공백) ⑤Active→라이브 대칭성 검증. 이후 재배포=push→KC 중지→시작.
 - 2026-06-27 (이어서10): **컨테이너 이미지 재배포 완료·라이브 검증 ✅.** ghcr public 전환 → KC 기존 git saju 삭제 → 컨테이너 이미지 등록(ID 768, 엔드포인트 동일 `https://saju-concierge.playmcp-endpoint.kakaocloud.io/mcp`) → Active. **라이브: 헬스 build=`7afbac7`(sha 주입)·7툴·궁합 74/74 대칭(수정 반영)·날씨 라이브(서울 21°C 구름조금·미세먼지).** 재배포 루프 확립(push→Actions ghcr:latest→KC 중지/시작). 워크플로우 `paths-ignore`(docs/**,md)로 문서 커밋은 빌드 제외. **다음=PlayMCP(playmcp.kakao.com) 임시등록 → 대화예시 3(docs/10) → 심사요청(≤7/7).**
+- 2026-06-29 (이어서11): **PlayMCP 등록·도구함 추가 완료 + 핸드오프 문서.** playmcp.kakao.com 임시등록(사주 컨시어지, 식별자 sajuConcierge, 대화예시 3·대표이미지=자체제작 `saju-concierge-cover.png` 1200²), **도구함 추가(Tools 7 Online) → Claude 커넥터로 사주 툴 직접 호출 가능.** KC는 컨테이너 이미지(ID 768) 재배포·라이브검증(궁합 74/74 대칭·날씨·build sha). **`docs/11_handoff.md` 신설**(새 세션 진입점, 풍부한 맥락판) + CLAUDE §1에 연결. 남은 핵심=심사요청(≤7/7)→전체공개→비즈폼(≤7/14). 컨텍스트 한계로 대화창 이전.

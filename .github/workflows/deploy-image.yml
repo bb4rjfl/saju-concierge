@@ -6,6 +6,10 @@ name: deploy-image
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.gitignore'
   workflow_dispatch: {}
 
 jobs:

@@ -140,7 +140,7 @@ export const findAuspiciousDate: ToolDef = {
       tryPhrase: "이사 좋은 날 찾아줘",
     });
 
-    const note = badMonth ? "_입력한 달 형식을 못 읽어 '앞으로 약 60일' 기준으로 보여드려요(YYYY-MM)._\n\n" : "";
+    const note = badMonth ? "_입력한 달을 못 읽어 '앞으로 약 60일' 기준으로 보여드려요(YYYY-MM)._\n\n" : "";
     return ok(note + renderDates(chart, range.label, result), CHOICES, share);
   },
 };

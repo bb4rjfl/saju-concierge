@@ -58,10 +58,10 @@ export interface Chart {
 /** 숫자 필드 정규화+범위 검증. 어긋나면 한글 RangeError(호출부가 친절 카드로 변환). */
 function reqInt(v: number | undefined | null, label: string, min: number, max: number): number {
   if (v === undefined || v === null || !Number.isFinite(v)) {
-    throw new RangeError(`${label}을(를) 숫자로 정확히 알려주세요`);
+    throw new RangeError(`${label} 값을 숫자로 정확히 알려주세요`);
   }
   const n = Math.trunc(v);
-  if (n < min || n > max) throw new RangeError(`${label}은(는) ${min}~${max} 사이로 알려주세요`);
+  if (n < min || n > max) throw new RangeError(`${label} 값은 ${min}~${max} 사이로 알려주세요`);
   return n;
 }
 
@@ -90,7 +90,7 @@ export function birthToProfile(input: BirthInput): Profile {
       month = s.month;
       day = s.day;
     } catch {
-      throw new RangeError("음력 날짜를 변환하지 못했어요. 음력 날짜가 맞는지 확인해 주세요.");
+      throw new RangeError("음력 날짜를 변환하지 못했어요. 음력 날짜가 맞는지 확인해 주세요");
     }
   }
 
@@ -137,7 +137,7 @@ export function computeChart(profile: Profile): Chart {
             applyTimeCorrection: true,
           });
   } catch {
-    throw new RangeError("존재하지 않는 날짜예요. 날짜(특히 '일')를 다시 확인해 주세요.");
+    throw new RangeError("존재하지 않는 날짜예요. 날짜(특히 '일')를 다시 확인해 주세요");
   }
 
   const year = makePillar(saju.yearPillar, saju.yearPillarHanja);

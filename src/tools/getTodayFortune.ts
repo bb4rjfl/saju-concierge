@@ -134,8 +134,10 @@ export const getTodayFortune: ToolDef = {
       );
     }
 
+    // 날씨/대기질은 '오늘' 카드에서만. 과거·미래 날짜 카드에 현재 날씨를 "오늘"로 붙이면
+    // 오해를 줄 수 있어 표시하지 않는다 (라이브 QA F-3).
     let wxLine: string | undefined;
-    if (chart.profile.location) {
+    if (isToday && chart.profile.location) {
       const w = await fetchWeather(chart.profile.location);
       if (w) wxLine = weatherLine(w, chart.profile.location);
     }
@@ -147,7 +149,7 @@ export const getTodayFortune: ToolDef = {
       lines: [`${"★".repeat(kit.stars)}${"☆".repeat(5 - kit.stars)} ${kit.score}점 — ${short}`, `🍀 럭키 ${kit.lucky.color} · ${kit.lucky.item}`],
       tryPhrase: "오늘 내 운세 봐줘",
     });
-    const note = badDate ? "_입력한 날짜 형식을 못 읽어 오늘 기준으로 보여드려요(YYYY-MM-DD)._\n\n" : "";
+    const note = badDate ? "_입력한 날짜를 못 읽어 오늘 기준으로 보여드려요(YYYY-MM-DD)._\n\n" : "";
     return ok(note + renderKit(chart, kit, isToday, wxLine), CHOICES, share);
   },
 };

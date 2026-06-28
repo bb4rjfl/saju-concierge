@@ -52,7 +52,14 @@ function choseongElement(ch: string): Element | null {
 
 export function readName(name: string): NameReading {
   // 이름은 보통 짧다. 비정상적으로 긴 입력은 앞 10자만(응답 비대화·24k 근접 방지).
-  const chars = [...name.trim()].filter((c) => c.trim().length > 0).slice(0, 10);
+  // PII 위생: 숫자·영문·기호·공백은 버리고 완성형 한글 음절만 본다
+  // (전화번호·주민번호 조각이 그대로 에코되는 것을 방지).
+  const chars = [...name]
+    .filter((c) => {
+      const code = c.charCodeAt(0);
+      return code >= 0xac00 && code <= 0xd7a3;
+    })
+    .slice(0, 10);
   const syllables = chars.map((ch) => ({ ch, element: choseongElement(ch) }));
   const els = syllables.map((s) => s.element).filter((e): e is Element => e !== null);
 

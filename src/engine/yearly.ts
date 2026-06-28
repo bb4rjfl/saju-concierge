@@ -86,6 +86,40 @@ const THEME: Record<
   },
 };
 
+// 같은 테마라도 사람마다 분기 멘트가 똑같이 보이지 않도록 대안 세트(개인 시드로 선택). (라이브 QA F-6)
+const SEASONS_ALT: Record<GodCategory, [string, string, string, string]> = {
+  인성: [
+    "봄: 관심 분야의 기초를 다지기 좋은 때",
+    "여름: 좋은 사람에게 배우면 빠르게 늘어요",
+    "가을: 익힌 것을 실전에 적용해 보기",
+    "겨울: 몸과 마음을 쉬며 내실을 채우기",
+  ],
+  식상: [
+    "봄: 떠오른 아이디어를 가볍게 꺼내보기",
+    "여름: 부지런히 움직이면 길이 열려요",
+    "가을: 반응 좋은 것에 힘을 몰아주기",
+    "겨울: 한 해의 결과를 기록으로 남기기",
+  ],
+  재성: [
+    "봄: 돈 될 정보를 차분히 모아두기",
+    "여름: 기회가 보이면 과감히 잡아보기",
+    "가을: 욕심은 줄이고 실속을 챙기기",
+    "겨울: 번 것을 지키고 새해 예산을 짜기",
+  ],
+  관성: [
+    "봄: 올해 이루고 싶은 목표를 정하기",
+    "여름: 책임을 다하면 평판이 올라가요",
+    "가을: 성과로 증명하는 결정적 시기",
+    "겨울: 벌이기보다 자리를 단단히 다지기",
+  ],
+  비겁: [
+    "봄: 내 색깔과 방향을 분명히 하기",
+    "여름: 좋은 동료와 손잡으면 커져요",
+    "가을: 관계의 거리를 건강하게 조절",
+    "겨울: 내 리듬대로 마무리하고 충전",
+  ],
+};
+
 function generatorOf(el: Element): Element {
   return ELEMENTS[(ELEMENTS.indexOf(el) + 4) % 5]!;
 }
@@ -124,6 +158,8 @@ export function computeYearlyFortune(chart: Chart, year: number): YearlyFortune 
   const stars = Math.max(1, Math.min(5, Math.round(score / 20)));
 
   const meta = THEME[theme];
+  // 분기 멘트는 개인 시드로 기본/대안 세트 중 선택 → 같은 테마라도 사람마다 다르게 보임.
+  const seasonLines = seed % 2 === 0 ? meta.seasons : SEASONS_ALT[theme];
   const favorableElement: Element = chart.lacking[0] ?? generatorOf(dm.element);
 
   return {
@@ -135,7 +171,7 @@ export function computeYearlyFortune(chart: Chart, year: number): YearlyFortune 
     headline: meta.headline,
     overview: meta.overview,
     keywords: meta.keywords,
-    seasons: meta.seasons.map((line, i) => ({ name: SEASON_NAMES[i]!, line })),
+    seasons: seasonLines.map((line, i) => ({ name: SEASON_NAMES[i]!, line })),
     favorableElement,
   };
 }

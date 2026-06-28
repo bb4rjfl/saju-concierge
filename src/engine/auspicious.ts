@@ -91,8 +91,8 @@ function scoreDay(
     reasons.push("내 일지와 합(잘 맞음)");
   }
   if (isChung(dayBranch, myYearBranch)) {
-    score -= 8;
-    reasons.push("내 띠와 충");
+    score -= 12;
+    reasons.push("내 띠와 살짝 충(작은 부딪힘)");
   }
 
   // 일간을 돕는(생하는) 오행 = 인성. 부족 오행 보충과 별개로 가점.

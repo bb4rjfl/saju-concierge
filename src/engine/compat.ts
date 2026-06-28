@@ -110,6 +110,16 @@ function band(score: number): 0 | 1 | 2 {
   return score >= 80 ? 0 : score >= 62 ? 1 : 2;
 }
 
+// 하트는 실사용 점수대(대략 50~99)에서 ♥1~5가 고루 나오도록 명시 구간화.
+// (round(score/20)은 70~87이 전부 4♥로 뭉쳐 공유 차별화가 약했음 — 라이브 QA F-5.)
+function heartsFor(score: number): number {
+  if (score >= 86) return 5;
+  if (score >= 74) return 4;
+  if (score >= 62) return 3;
+  if (score >= 50) return 2;
+  return 1;
+}
+
 function pick<T>(arr: T[], seed: number): T {
   return arr[seed % arr.length]!;
 }
@@ -139,7 +149,7 @@ export function computeCompatibility(a: Chart, b: Chart, relation?: string): Com
   const seed = hashStr(pairKey);
   let score = DM_BASE[dr] + BRANCH_ADJ[br] + Math.min(8, fills * 4) + ((seed % 7) - 3);
   score = Math.max(40, Math.min(99, score));
-  const hearts = Math.max(1, Math.min(5, Math.round(score / 20)));
+  const hearts = heartsFor(score);
 
   const complementNote =
     fills >= 2

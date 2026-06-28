@@ -19,6 +19,21 @@ describe("computeCompatibility (engine)", () => {
     expect(c1.hearts).toBeLessThanOrEqual(5);
   });
 
+  it("is symmetric — same score/hearts/headline regardless of A↔B order", () => {
+    const pairs = [
+      [{ year: 1990, month: 5, day: 15, hour: 14 }, { year: 1988, month: 7, day: 21 }],
+      [{ year: 1995, month: 3, day: 2 }, { year: 2000, month: 1, day: 1 }],
+      [{ year: 1972, month: 11, day: 3 }, { year: 2010, month: 12, day: 25 }],
+    ] as const;
+    for (const [x, y] of pairs) {
+      const f = computeCompatibility(chartFromBirth(x), chartFromBirth(y), "love");
+      const r = computeCompatibility(chartFromBirth(y), chartFromBirth(x), "love");
+      expect(f.score).toBe(r.score);
+      expect(f.hearts).toBe(r.hearts);
+      expect(f.headline).toBe(r.headline);
+    }
+  });
+
   it("reads the day-master element relation (금생수 → 상생)", () => {
     expect(computeCompatibility(a, b).dmRelation).toBe("상생");
   });

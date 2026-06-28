@@ -134,7 +134,9 @@ export function computeCompatibility(a: Chart, b: Chart, relation?: string): Com
   const br = branchRelation(a.pillars.year.branch, b.pillars.year.branch);
   const fills = complementFills(a, b);
 
-  const seed = hashStr(`${a.pillars.day.name}|${b.pillars.day.name}|${a.animal}|${b.animal}`);
+  // 순서 무관(대칭) 시드 — 누가 personA든 같은 궁합 점수·헤드라인이 나오게(공유 신뢰성).
+  const pairKey = [`${a.pillars.day.name}${a.animal}`, `${b.pillars.day.name}${b.animal}`].sort().join("|");
+  const seed = hashStr(pairKey);
   let score = DM_BASE[dr] + BRANCH_ADJ[br] + Math.min(8, fills * 4) + ((seed % 7) - 3);
   score = Math.max(40, Math.min(99, score));
   const hearts = Math.max(1, Math.min(5, Math.round(score / 20)));

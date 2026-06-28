@@ -1,0 +1,42 @@
+name: deploy-image
+
+# main에 push될 때마다 linux/amd64 이미지를 빌드해 public ghcr에 올린다.
+# 키가 0개라 시크릿 설정 불필요(GITHUB_TOKEN만 사용). KC는 이 이미지(latest)를 컨테이너
+# 이미지로 등록하고, 재배포는 "중지→시작"으로 latest를 다시 pull한다. (docs/07 D-119)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push (linux/amd64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/bb4rjfl/saju-concierge:latest
+            ghcr.io/bb4rjfl/saju-concierge:${{ github.sha }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}

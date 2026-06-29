@@ -68,3 +68,30 @@ describe("compatibility heart spread (live QA F-5)", () => {
     expect(computeCompatibility(x, y, "love").hearts).toBe(computeCompatibility(y, x, "love").hearts);
   });
 });
+
+describe("lunar 음력 12월 (섣달) conversion fallback (live QA D-121)", () => {
+  it("converts 음력 2021-12-15 → solar 2022-01-17 (library rejects, fallback resolves)", () => {
+    const c = chartFromBirth({ year: 2021, month: 12, day: 15, isLunar: true, unknownTime: true });
+    expect(c.profile.year).toBe(2022);
+    expect(c.profile.month).toBe(1);
+    expect(c.profile.day).toBe(17);
+  });
+
+  it("converts 음력 1990-12-28 (섣달) without throwing → early solar 1991", () => {
+    const c = chartFromBirth({ year: 1990, month: 12, day: 28, isLunar: true, unknownTime: true });
+    expect(c.profile.year).toBe(1991);
+  });
+
+  it("normal lunar months still go through the primary path (음력 2021-11-15 → 2021-12-18)", () => {
+    const c = chartFromBirth({ year: 2021, month: 11, day: 15, isLunar: true, unknownTime: true });
+    expect(c.profile.year).toBe(2021);
+    expect(c.profile.month).toBe(12);
+    expect(c.profile.day).toBe(18);
+  });
+
+  it("a genuinely nonexistent lunar date (음력 2021-12-30, month has 29 days) still errors", () => {
+    expect(() =>
+      chartFromBirth({ year: 2021, month: 12, day: 30, isLunar: true, unknownTime: true }),
+    ).toThrow();
+  });
+});

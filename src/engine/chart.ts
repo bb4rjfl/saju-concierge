@@ -6,6 +6,7 @@
 import {
   calculateSaju,
   lunarToSolar,
+  solarToLunar,
   isSupportedYear,
   getSupportedRange,
 } from "@fullstackfamily/manseryeok";
@@ -65,6 +66,42 @@ function reqInt(v: number | undefined | null, label: string, min: number, max: n
   return n;
 }
 
+/**
+ * 음력→양력 폴백. 라이브러리 `lunarToSolar`가 일부 음력월(특히 12월/섣달)을
+ * `Invalid lunar date`로 거부하는 한계가 있어(라이브 QA D-121 확인), 정상 작동하는
+ * `solarToLunar`로 해당 음력 연도 구간을 역탐색해 매칭 양력일을 찾는다. 못 찾으면 null
+ * (= 실제로 존재하지 않는 음력일). 폴백은 1차 변환 실패 시에만 돈다.
+ */
+function lunarToSolarScan(
+  ly: number,
+  lm: number,
+  ld: number,
+  leap: boolean,
+): { year: number; month: number; day: number } | null {
+  // 음력 ly년의 달들은 양력 ly년 초 ~ (ly+1)년 초에 걸친다(12월은 다음 양력해로 넘어감).
+  const start = new Date(Date.UTC(ly, 0, 1));
+  const end = new Date(Date.UTC(ly + 1, 2, 15));
+  for (const t = start; t <= end; t.setUTCDate(t.getUTCDate() + 1)) {
+    const sy = t.getUTCFullYear();
+    const sm = t.getUTCMonth() + 1;
+    const sd = t.getUTCDate();
+    try {
+      const lun = solarToLunar(sy, sm, sd).lunar as {
+        year: number;
+        month: number;
+        day: number;
+        isLeapMonth?: boolean;
+      };
+      if (lun.year === ly && lun.month === lm && lun.day === ld && Boolean(lun.isLeapMonth) === leap) {
+        return { year: sy, month: sm, day: sd };
+      }
+    } catch {
+      // 지원 범위 밖/유효하지 않은 양력일은 건너뜀
+    }
+  }
+  return null;
+}
+
 /** 사용자 입력(음력/시 모름 포함) → 정규화된 양력 프로필. 잘못된 값은 한글 RangeError. */
 export function birthToProfile(input: BirthInput): Profile {
   if (input.year === undefined || input.year === null || !Number.isFinite(input.year)) {
@@ -84,14 +121,20 @@ export function birthToProfile(input: BirthInput): Profile {
       const r = getSupportedRange();
       throw new RangeError(`지원 연도(${r.min}~${r.max}) 밖이에요`);
     }
+    const leap = input.isLeapMonth ?? false;
+    let s: { year: number; month: number; day: number } | null = null;
     try {
-      const s = lunarToSolar(year, month, day, input.isLeapMonth ?? false).solar;
-      year = s.year;
-      month = s.month;
-      day = s.day;
+      s = lunarToSolar(year, month, day, leap).solar;
     } catch {
+      // 라이브러리가 못 푸는 음력월(예: 12월/섣달)은 solarToLunar 역탐색으로 폴백.
+      s = lunarToSolarScan(year, month, day, leap);
+    }
+    if (!s) {
       throw new RangeError("음력 날짜를 변환하지 못했어요. 음력 날짜가 맞는지 확인해 주세요");
     }
+    year = s.year;
+    month = s.month;
+    day = s.day;
   }
 
   return {

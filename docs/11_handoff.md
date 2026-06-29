@@ -31,7 +31,8 @@ git -C "C:/Users/user/Claude/Projects/사주" status -sb
 - ✅ **KC 배포 Active**: PlayMCP in KC, **컨테이너 이미지** 방식, 서버명 `saju-concierge`(ID 768), Endpoint `https://saju-concierge.playmcp-endpoint.kakaocloud.io/mcp`. 라이브 검증 통과(궁합 대칭 74/74·날씨·헬스 build sha).
 - ✅ **PlayMCP 등록(playmcp.kakao.com)**: 임시 등록 + **도구함 추가 완료**(Tools 7, MCP Online). 대화예시 3개 + 대표 이미지 등록함. **→ Claude 커넥터(PlayMCP)로 사주 툴 호출 가능**(다음 세션도 ToolSearch로 `사주 컨시어지: computeSajuChart` 등 사용 가능).
 - ✅ **라이브 MCP 시나리오 QA 라운드(2026-06-29, D-120)**: 도구함 커넥터로 배포본 직접 호출 ~80건 + 하니스 324건 → **324/324 PASS**(크래시·-32602·PII·kakao누출·24k·대칭불일치 0, 16유형 도달, 인젝션 면역). 폴리시 8종 수정(F-1~F-8): F-7🔴 interpretName PII숫자 에코 차단, F-5 궁합 하트 구간화, 나머지 코스메틱. **빌드+테스트 63 green.** 툴/스키마 불변(재심사 아님).
-- 🔶 **재배포 대기(이 수정분 라이브 반영)**: `git push`(완료 시) → Actions ghcr:latest → **KC 콘솔 `saju-concierge` 중지→시작** → health `build` sha=최신 확인. 이 한 단계(중지→시작)는 사용자 콘솔 작업.
+- ✅ **2차 라이브 QA(2026-06-29, 서브에이전트 ~210건, D-121)**: 신규 시나리오 🔴 0(F-1~F-8 유지·15/16유형·궁합 하트 전구간). 발견·수정: **음력 12월(섣달) 입력이 라이브러리 한계로 전부 거부**되던 것 → `solarToLunar` 역탐색 폴백으로 정상화(`engine/chart.ts`). 테스트 63→67. (서브에이전트의 윤달 실패 주장은 오인—정상 확인.)
+- 🔶 **재배포 대기(D-120·D-121 라이브 반영)**: `git push`(완료 시) → Actions ghcr:latest → **KC 콘솔 `saju-concierge` 중지→시작** → health `build` sha=최신 확인. 이 한 단계(중지→시작)는 사용자 콘솔 작업.
 - ⛔ **아직 안 한 것(= 남은 핵심)**: **심사 요청(≤7/7)** → 승인 → **전체 공개** → **비즈폼 "Player 예선 참여"(≤7/14, 최대 2개, 1회 제출)**.
 
 **마감(중요)**: 심사요청 **≤2026-07-07**(심사 최대 7일, 7/7 요청분만 기한보장) / 비즈폼 **≤2026-07-14**. 오늘 2026-06-29 기준 여유 있음.

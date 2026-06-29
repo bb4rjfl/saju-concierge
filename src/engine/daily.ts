@@ -11,6 +11,7 @@ import type { Chart } from "./chart.js";
 import {
   ELEMENTS,
   STEMS,
+  BRANCHES,
   controls,
   categoryFor,
   type Element,
@@ -48,6 +49,10 @@ export interface DailyKit {
   dos: string[];
   donts: string[];
   favorableElement: Element;
+  /** 점수+분야를 엮은 한두 줄 종합평("점수만 보면 뭘 하라는지 모름" 보완). */
+  summary: string;
+  /** 오늘 참고할 인연 팁 — 나와 합이 좋은 띠(=나이대) + 힘이 되는 기운 + 행동. */
+  affinity: { animals: string[]; element: Element; note: string };
 }
 
 type Band = "상" | "중" | "하";
@@ -156,6 +161,50 @@ const LUCKY_TIME: Record<Element, string> = {
   수: "밤 (21~23시)",
 };
 
+// 종합평(점수만으로는 막연 → 한두 줄로 "그래서 뭘 하면 되는지").
+const TOP_FOCUS: Record<string, string> = {
+  애정: "마음을 먼저 표현해 보고",
+  재물: "실리를 챙겨 보고",
+  일: "중요한 일을 밀어붙여 보고",
+  건강: "활동량을 조금 늘려 보고",
+};
+const BOTTOM_CARE: Record<string, string> = {
+  애정: "기대를 살짝 내려놓으면 편해요",
+  재물: "지출을 한 번 더 점검하면 좋아요",
+  일: "무리한 일정은 피하는 게 좋아요",
+  건강: "휴식을 충분히 챙기는 게 좋아요",
+};
+
+// 오늘 참고할 인연 — 테마별 "이런 사람과 이렇게" 행동 팁.
+const AFFINITY_NOTE: Record<GodCategory, string> = {
+  재성: "함께 실리를 도모하거나 거래·미팅을 잡기 좋아요",
+  관성: "윗사람·동료와 호흡을 맞추면 인정받기 좋아요",
+  식상: "같이 새로운 걸 시도하거나 수다로 푸는 날",
+  인성: "선배·멘토에게 조언을 구하면 도움이 와요",
+  비겁: "친구·동료와 힘을 합치면 시너지가 나요",
+};
+
+// 지지 합(육합·삼합) — 나(일지)와 호흡이 잘 맞는 띠를 고를 때 사용.
+const YUKHAP_D: [string, string][] = [
+  ["자", "축"], ["인", "해"], ["묘", "술"], ["진", "유"], ["사", "신"], ["오", "미"],
+];
+const SAMHAP_D: string[][] = [
+  ["신", "자", "진"], ["해", "묘", "미"], ["인", "오", "술"], ["사", "유", "축"],
+];
+
+/** 내 일지(日支)와 합(육합·삼합)이 되는 띠 목록 = "나와 잘 맞는 띠". */
+function harmonyAnimals(branch: string): string[] {
+  const set = new Set<string>();
+  for (const [a, b] of YUKHAP_D) {
+    if (a === branch) set.add(b);
+    else if (b === branch) set.add(a);
+  }
+  for (const g of SAMHAP_D) {
+    if (g.includes(branch)) for (const x of g) if (x !== branch) set.add(x);
+  }
+  return [...set].map((b) => BRANCHES[b]!.animal);
+}
+
 function hashStr(s: string): number {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) {
@@ -180,6 +229,23 @@ function band(s: number): Band {
 
 function pick<T>(arr: T[], seed: number): T {
   return arr[seed % arr.length]!;
+}
+
+/** 점수+분야 대비 → 한두 줄 종합평(가장 좋은/약한 분야를 짚어 행동 가이드). */
+function computeSummary(score: number, domains: DailyDomain[]): string {
+  const lead =
+    band(score) === "상"
+      ? "전반적으로 기운이 좋은 하루예요."
+      : band(score) === "중"
+        ? "전반적으로 무난하게 흐르는 하루예요."
+        : "전반적으로 조심스럽게 가면 좋은 하루예요.";
+  const sorted = [...domains].sort((a, b) => b.score - a.score);
+  const top = sorted[0]!;
+  const bot = sorted[sorted.length - 1]!;
+  if (top.key === bot.key || top.score - bot.score < 6) {
+    return `${lead} 네 분야가 고르게 흐르니 평소 페이스를 지키며 보내기 좋아요.`;
+  }
+  return `${lead} 특히 ${top.emoji}${top.key} 기운이 가장 좋으니 ${TOP_FOCUS[top.key]}, ${bot.emoji}${bot.key}은 ${BOTTOM_CARE[bot.key]}.`;
 }
 
 function occupationTip(raw: string | undefined): string | undefined {
@@ -256,6 +322,13 @@ export function computeDailyKit(
   const tip = occupationTip(occupation);
   if (tip) dos.push(tip);
 
+  const summary = computeSummary(score, domains);
+  const affinity = {
+    animals: harmonyAnimals(chart.pillars.day.branch),
+    element: favorableElement,
+    note: AFFINITY_NOTE[theme],
+  };
+
   return {
     date: today,
     dayGanji,
@@ -268,5 +341,7 @@ export function computeDailyKit(
     dos,
     donts,
     favorableElement,
+    summary,
+    affinity,
   };
 }

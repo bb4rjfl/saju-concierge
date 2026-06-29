@@ -8,6 +8,7 @@ import { SERVICE_NAME } from "../lib/constants.js";
 import { birthShape, resolveChart, BIRTH_PROMPT_TITLE, BIRTH_PROMPT_DETAIL } from "./_shared.js";
 import { computeDailyKit, koreaToday, type DailyKit } from "../engine/daily.js";
 import { encodeProfile } from "../engine/profile.js";
+import { OHAENG } from "../data/ohaeng.js";
 import type { Chart } from "../engine/chart.js";
 
 const shape = {
@@ -19,9 +20,10 @@ const shape = {
 };
 
 const CHOICES: Choice[] = [
-  { emoji: "🔮", cmd: "내일 운세", desc: "내일 기운 미리보기" },
-  { emoji: "🧬", cmd: "성향 분석", desc: "내 사주 유형(MBTI식) 보기" },
   { emoji: "💞", cmd: "궁합 보기", desc: "상대 생년월일로 궁합" },
+  { emoji: "🔮", cmd: "명식 보기", desc: "내 사주 명식 자세히" },
+  { emoji: "🧬", cmd: "성향 분석", desc: "내 사주 유형(MBTI식)" },
+  { emoji: "📆", cmd: "내일 운세", desc: "내일 기운 미리보기" },
 ];
 
 function parseDate(s?: string): { year: number; month: number; day: number } | null {
@@ -58,9 +60,18 @@ function renderKit(chart: Chart, kit: DailyKit, isToday: boolean, wx?: string): 
 
   const code = encodeProfile(chart.profile);
 
+  const favEmoji = OHAENG[kit.favorableElement].emoji;
+  const aff = kit.affinity;
+  const affLine =
+    (aff.animals.length
+      ? `🤝 **나와 잘 맞는 인연** — ${aff.animals.join("·")}띠 · ${OHAENG[aff.element].emoji}${aff.element} 기운의 사람`
+      : `🤝 **나와 잘 맞는 인연** — ${OHAENG[aff.element].emoji}${aff.element} 기운의 사람`) + `\n- ${aff.note}`;
+
   const dailyNudge = isToday
     ? "\n💡 매일 아침 카톡으로 받고 싶다면, 에이전트에게 **\"매일 아침 8시에 오늘의 기운 보내줘\"** 라고 한 번만 설정해 보세요(지원 클라이언트 한정)."
     : "";
+
+  const nextStep = `👉 **이어서 해볼까요?** \`궁합 보기\` · \`명식 보기\` · \`내일 운세\``;
 
   return [
     title,
@@ -73,7 +84,9 @@ function renderKit(chart: Chart, kit: DailyKit, isToday: boolean, wx?: string): 
     "**키워드**",
     domainLines,
     "",
-    `🍀 **오늘의 럭키** _(나에게 힘이 되는 ${kit.favorableElement} 기운)_`,
+    `📝 **종합평** — ${kit.summary}`,
+    "",
+    `🍀 **오늘의 럭키** _(나에게 힘이 되는 ${favEmoji} ${kit.favorableElement} 기운)_`,
     lucky,
     "",
     "✅ **이렇게 해보세요**",
@@ -81,7 +94,11 @@ function renderKit(chart: Chart, kit: DailyKit, isToday: boolean, wx?: string): 
     "",
     "🚫 **이건 잠깐 멈춰요**",
     donts,
+    "",
+    affLine,
     dailyNudge,
+    "",
+    nextStep,
     "",
     `🔑 **내 사주 코드**: \`${code}\``,
   ].join("\n");

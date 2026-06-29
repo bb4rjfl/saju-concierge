@@ -6,6 +6,7 @@ import { SERVICE_NAME } from "../lib/constants.js";
 import { birthShape, resolveChart, BIRTH_PROMPT_TITLE, BIRTH_PROMPT_DETAIL } from "./_shared.js";
 import { encodeProfile } from "../engine/profile.js";
 import { ELEMENTS, type Element } from "../engine/elements.js";
+import { OHAENG } from "../data/ohaeng.js";
 import type { Chart } from "../engine/chart.js";
 
 const CHOICES: Choice[] = [
@@ -26,7 +27,7 @@ function renderElementBalance(chart: Chart): string {
       const n = chart.elementCounts[e];
       const bar = n > 0 ? BAR_FULL.repeat(n) : "·";
       const tag = n === 0 ? " ← 부족" : "";
-      return `- ${e} ${bar} ${n}${tag}`;
+      return `- ${OHAENG[e].emoji} ${e} ${bar} ${n}${tag}`;
     })
     .join("\n");
 }
@@ -65,10 +66,11 @@ function renderChart(chart: Chart): string {
   const sipsinLine =
     chart.sipsin.length > 0 ? chart.sipsin.map((s) => `${s.position} ${s.sipsin}`).join(" · ") : "—";
 
+  const withEmoji = (els: Element[]) => els.map((e) => `${OHAENG[e].emoji}${e}`).join("·");
   const balanceRead =
-    `→ **${chart.dominant.join("·")}** 기운이 강하고` +
+    `→ **${withEmoji(chart.dominant)}** 기운이 강하고` +
     (chart.lacking.length > 0
-      ? `, **${chart.lacking.join("·")}** 기운이 비었어요.`
+      ? `, **${withEmoji(chart.lacking)}** 기운이 비었어요.`
       : ", 비교적 고른 편이에요.");
 
   const code = encodeProfile(prof);

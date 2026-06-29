@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { chartFromBirth } from "../src/engine/chart.js";
 import { computeCompatibility } from "../src/engine/compat.js";
+import { computeDailyKit } from "../src/engine/daily.js";
 import { interpretName } from "../src/tools/interpretName.js";
+import { getTodayFortune } from "../src/tools/getTodayFortune.js";
+import { computeSajuChart } from "../src/tools/computeSajuChart.js";
 
 const text = (r: { content: { text: string }[] }) => r.content[0]!.text;
 
@@ -93,5 +96,33 @@ describe("lunar 음력 12월 (섣달) conversion fallback (live QA D-121)", () =
     expect(() =>
       chartFromBirth({ year: 2021, month: 12, day: 30, isLunar: true, unknownTime: true }),
     ).toThrow();
+  });
+});
+
+describe("today-fortune UX additions (live AI-chat feedback)", () => {
+  const REF = { year: 1988, month: 1, day: 16, hour: 13 };
+
+  it("daily kit carries a summary + affinity, deterministically", () => {
+    const date = { year: 2026, month: 6, day: 29 };
+    const kit = computeDailyKit(chartFromBirth(REF), date);
+    expect(kit.summary.length).toBeGreaterThan(10);
+    expect(kit.affinity.animals.length).toBeGreaterThan(0);
+    expect(computeDailyKit(chartFromBirth(REF), date)).toEqual(kit); // same input → same output
+  });
+
+  it("today card renders 종합평, 인연(띠), and a next-step nudge", async () => {
+    const t = text((await getTodayFortune.handler({ ...REF })) as never);
+    expect(t).toContain("종합평");
+    expect(t).toContain("나와 잘 맞는 인연");
+    expect(t).toMatch(/[가-힣]띠/); // affinity lists at least one 띠
+    expect(t).toContain("이어서"); // body-level next-step (survives host summarization)
+    expect(t).toContain("궁합 보기"); // chip
+    expect(t.length).toBeLessThan(24_000);
+  });
+
+  it("chart 오행 분포 carries element emojis", async () => {
+    const t = text((await computeSajuChart.handler({ year: 1990, month: 5, day: 15, hour: 14 })) as never);
+    expect(t).toContain("⚪ 금"); // 금 distribution line with emoji (1990-05-15 has 금)
+    expect(t).toMatch(/[🔥💧🌳⛰️]/); // other element emojis present too
   });
 });

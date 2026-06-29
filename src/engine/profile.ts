@@ -51,14 +51,27 @@ function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-/** 코드 구분자(|)와 줄바꿈만 제거. 한글은 그대로 유지(읽기 쉬움). */
+/**
+ * 표시·코드용 텍스트 정제. 한글·영문·숫자·기본 구분자(·.-·공백)만 남기고
+ * 코드 구분자(|)·줄바꿈·마크다운/주입성 문자(따옴표·백틱·<>·;·/ 등)는 제거,
+ * 길이 24자 제한. 숫자열(4자리↑)이 섞이면 PII(전화·주민·카드 등)로 보고 통째로 드롭.
+ */
 function sanitize(s?: string): string {
   if (!s) return "-";
-  const cleaned = s.replace(/[|\r\n]/g, " ").trim().slice(0, 24);
+  const cleaned = (s.normalize("NFC").match(/[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9 ·.\-]/g) ?? [])
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 24);
   if (cleaned.length === 0) return "-";
-  // 개인정보 방지: 주민번호·카드·전화 등 숫자열(4자리 이상 연속)이 섞이면 코드에 싣지 않음.
   if (/\d{4,}/.test(cleaned)) return "-";
   return cleaned;
+}
+
+/** 표시·프로필 저장용으로 정제된 텍스트(없거나 정제 후 비면 undefined). */
+export function cleanText(s?: string): string | undefined {
+  const c = sanitize(s);
+  return c === "-" ? undefined : c;
 }
 
 /** 정규화된 프로필 → 사람이 읽을 수 있는 프로필 코드 문자열. */
@@ -101,8 +114,8 @@ export function decodeProfile(code: string): Profile | null {
   const g = parts[4];
   const gender: Gender | undefined = g === "M" || g === "F" ? g : undefined;
 
-  const loc = parts[5] && parts[5] !== "-" ? parts[5] : undefined;
-  const job = parts[6] && parts[6] !== "-" ? parts[6] : undefined;
+  const loc = cleanText(parts[5]);
+  const job = cleanText(parts[6]);
 
   return { year, month, day, hour, minute, gender, longitude, location: loc, occupation: job };
 }

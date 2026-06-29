@@ -19,6 +19,7 @@ import {
   type YinYang,
   type Sipsin,
 } from "./elements.js";
+import { cleanText } from "./profile.js";
 import type { BirthInput, Profile } from "./profile.js";
 
 export interface Pillar {
@@ -145,8 +146,8 @@ export function birthToProfile(input: BirthInput): Profile {
     minute,
     gender: input.gender,
     longitude: Number.isFinite(input.longitude) ? (input.longitude as number) : 127,
-    location: input.location,
-    occupation: input.occupation,
+    location: cleanText(input.location),
+    occupation: cleanText(input.occupation),
   };
 }
 

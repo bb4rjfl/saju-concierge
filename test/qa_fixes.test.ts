@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { chartFromBirth } from "../src/engine/chart.js";
+import { chartFromBirth, birthToProfile } from "../src/engine/chart.js";
 import { computeCompatibility } from "../src/engine/compat.js";
 import { computeDailyKit } from "../src/engine/daily.js";
+import { encodeProfile, decodeProfile } from "../src/engine/profile.js";
 import { interpretName } from "../src/tools/interpretName.js";
 import { getTodayFortune } from "../src/tools/getTodayFortune.js";
 import { computeSajuChart } from "../src/tools/computeSajuChart.js";
@@ -124,5 +125,32 @@ describe("today-fortune UX additions (live AI-chat feedback)", () => {
     const t = text((await computeSajuChart.handler({ year: 1990, month: 5, day: 15, hour: 14 })) as never);
     expect(t).toContain("⚪ 금"); // 금 distribution line with emoji (1990-05-15 has 금)
     expect(t).toMatch(/[🔥💧🌳⛰️]/); // other element emojis present too
+  });
+});
+
+describe("location/occupation hygiene (live QA D-123)", () => {
+  it("strips markdown/injection chars from free-text location", () => {
+    const code = encodeProfile(
+      birthToProfile({ year: 1990, month: 5, day: 15, hour: 14, location: "서울'; rm -rf / `x`" }),
+    );
+    const loc = code.split("|")[5]!; // location field of the profile code
+    expect(loc).toContain("서울"); // legit city part preserved
+    expect(loc).not.toMatch(/['"`;<>/|]/); // no quote/backtick/semicolon/slash/angle/pipe
+  });
+
+  it("a '|' in location cannot corrupt the profile code (round-trips to 7 fields)", () => {
+    const code = encodeProfile(birthToProfile({ year: 1990, month: 5, day: 15, hour: 14, location: "서울|hack" }));
+    expect(code.split("|").length).toBe(7);
+    const back = decodeProfile(code);
+    expect(back).not.toBeNull();
+    expect(back!.year).toBe(1990);
+  });
+
+  it("digit-string PII in location/occupation is dropped (regression)", async () => {
+    const t = text(
+      (await computeSajuChart.handler({ year: 1990, month: 5, day: 5, location: "전화 010-1234-5678", occupation: "사번 12345678" })) as never,
+    );
+    expect(t).not.toContain("12345678");
+    expect(t).not.toContain("1234");
   });
 });

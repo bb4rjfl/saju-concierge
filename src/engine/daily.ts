@@ -53,6 +53,8 @@ export interface DailyKit {
   summary: string;
   /** 오늘 참고할 인연 팁 — 나와 합이 좋은 띠(=나이대) + 힘이 되는 기운 + 행동. */
   affinity: { animals: string[]; element: Element; note: string };
+  /** 카톡 '나와의 채팅' 발송용 ≤200자 한 줄 요약(에이전트가 데일리 푸시로 그대로 전송). */
+  pushLine: string;
 }
 
 type Band = "상" | "중" | "하";
@@ -329,6 +331,28 @@ export function computeDailyKit(
     note: AFFINITY_NOTE[theme],
   };
 
+  // 카톡 발송용 ≤200자 한 줄(에이전트가 데일리 푸시로 그대로 전송). 200자 넘으면 압축.
+  const topD = [...domains].sort((a, b) => b.score - a.score)[0]!;
+  const affAnimals = affinity.animals.slice(0, 2);
+  let pushLine = [
+    `🌅 오늘의 기운 ${today.month}/${today.day} ${"★".repeat(stars)}${"☆".repeat(5 - stars)} ${score}점`,
+    headline,
+    `${topD.emoji}${topD.key} ${topD.score} · 🍀 ${lucky.color}·${lucky.item}`,
+    affAnimals.length ? `🤝 ${affAnimals.join("·")}띠와 잘 맞아요` : "",
+    `👉 "오늘 내 운세 봐줘" — Saju Concierge 🙂`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  if (pushLine.length > 200) {
+    pushLine = [
+      `🌅 오늘의 기운 ${today.month}/${today.day} ${score}점 ${headline}`,
+      `${topD.emoji}${topD.key} ${topD.score} · 🍀 ${lucky.color}`,
+      `👉 "오늘 내 운세 봐줘" — Saju Concierge`,
+    ]
+      .join("\n")
+      .slice(0, 200);
+  }
+
   return {
     date: today,
     dayGanji,
@@ -343,5 +367,6 @@ export function computeDailyKit(
     favorableElement,
     summary,
     affinity,
+    pushLine,
   };
 }

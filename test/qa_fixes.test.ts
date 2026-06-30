@@ -163,3 +163,36 @@ describe("composer-directive follow-up footer (live QA D-124)", () => {
     expect(t).not.toContain("눌러서 이어가기"); // old droppable UI-meta header removed
   });
 });
+
+describe("KakaoTalk daily push line (D-126)", () => {
+  it("pushLine stays ≤200 chars and self-contained across varied charts/dates", () => {
+    const seeds = [
+      { year: 1988, month: 1, day: 16, hour: 13 },
+      { year: 1990, month: 5, day: 15, hour: 14 },
+      { year: 2000, month: 12, day: 31 },
+      { year: 1975, month: 7, day: 7, hour: 23 },
+    ];
+    const dates = [
+      { year: 2026, month: 6, day: 30 },
+      { year: 2026, month: 1, day: 1 },
+      { year: 2026, month: 12, day: 25 },
+    ];
+    for (const s of seeds) {
+      for (const d of dates) {
+        const kit = computeDailyKit(chartFromBirth(s), d);
+        expect(kit.pushLine.length).toBeLessThanOrEqual(200);
+        expect(kit.pushLine).toContain("오늘의 기운");
+        expect(kit.pushLine).toContain("Saju Concierge");
+      }
+    }
+  });
+
+  it("today card surfaces the 카톡 push-line block (and not on a future date)", async () => {
+    const today = text((await getTodayFortune.handler({ year: 1988, month: 1, day: 16, hour: 13 })) as never);
+    expect(today).toContain("카톡으로 받기");
+    const future = text(
+      (await getTodayFortune.handler({ year: 1988, month: 1, day: 16, hour: 13, targetDate: "2030-01-01" })) as never,
+    );
+    expect(future).not.toContain("카톡으로 받기");
+  });
+});

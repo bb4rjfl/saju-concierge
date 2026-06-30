@@ -71,6 +71,11 @@ function renderKit(chart: Chart, kit: DailyKit, isToday: boolean, wx?: string): 
     ? "\n💡 매일 아침 카톡으로 받고 싶다면, 에이전트에게 **\"매일 아침 8시에 오늘의 기운 보내줘\"** 라고 한 번만 설정해 보세요(지원 클라이언트 한정)."
     : "";
 
+  // 스케줄 에이전트가 그대로 '나와의 채팅'(MemoChat ≤200자)으로 보낼 수 있는 한 줄.
+  const pushBlock = isToday
+    ? `\n📲 **카톡으로 받기** — 에이전트가 매일 이 한 줄을 '나와의 채팅'으로 보내면 돼요(200자 이내):\n${kit.pushLine}`
+    : "";
+
   return [
     title,
     intro,
@@ -95,6 +100,7 @@ function renderKit(chart: Chart, kit: DailyKit, isToday: boolean, wx?: string): 
     "",
     affLine,
     dailyNudge,
+    pushBlock,
     "",
     `🔑 **내 사주 코드**: \`${code}\``,
   ].join("\n");

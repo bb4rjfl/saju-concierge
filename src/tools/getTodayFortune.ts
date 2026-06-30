@@ -71,8 +71,6 @@ function renderKit(chart: Chart, kit: DailyKit, isToday: boolean, wx?: string): 
     ? "\n💡 매일 아침 카톡으로 받고 싶다면, 에이전트에게 **\"매일 아침 8시에 오늘의 기운 보내줘\"** 라고 한 번만 설정해 보세요(지원 클라이언트 한정)."
     : "";
 
-  const nextStep = `👉 **이어서 해볼까요?** \`궁합 보기\` · \`명식 보기\` · \`내일 운세\``;
-
   return [
     title,
     intro,
@@ -97,8 +95,6 @@ function renderKit(chart: Chart, kit: DailyKit, isToday: boolean, wx?: string): 
     "",
     affLine,
     dailyNudge,
-    "",
-    nextStep,
     "",
     `🔑 **내 사주 코드**: \`${code}\``,
   ].join("\n");

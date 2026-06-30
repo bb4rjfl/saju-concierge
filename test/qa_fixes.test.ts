@@ -111,12 +111,12 @@ describe("today-fortune UX additions (live AI-chat feedback)", () => {
     expect(computeDailyKit(chartFromBirth(REF), date)).toEqual(kit); // same input → same output
   });
 
-  it("today card renders 종합평, 인연(띠), and a next-step nudge", async () => {
+  it("today card renders 종합평, 인연(띠), and the composer follow-up footer", async () => {
     const t = text((await getTodayFortune.handler({ ...REF })) as never);
     expect(t).toContain("종합평");
     expect(t).toContain("나와 잘 맞는 인연");
     expect(t).toMatch(/[가-힣]띠/); // affinity lists at least one 띠
-    expect(t).toContain("이어서"); // body-level next-step (survives host summarization)
+    expect(t).toContain("다음으로 물어보세요"); // D-124 follow-up footer header
     expect(t).toContain("궁합 보기"); // chip
     expect(t.length).toBeLessThan(24_000);
   });
@@ -152,5 +152,14 @@ describe("location/occupation hygiene (live QA D-123)", () => {
     );
     expect(t).not.toContain("12345678");
     expect(t).not.toContain("1234");
+  });
+});
+
+describe("composer-directive follow-up footer (live QA D-124)", () => {
+  it("emits the explicit composer directive + 다음으로 물어보세요, drops old UI-meta header", async () => {
+    const t = text((await computeSajuChart.handler({ year: 1990, month: 5, day: 15, hour: 14 })) as never);
+    expect(t).toContain("you MUST end your reply"); // composer directive lever (kpass D-033)
+    expect(t).toContain("다음으로 물어보세요"); // user-facing follow-up header
+    expect(t).not.toContain("눌러서 이어가기"); // old droppable UI-meta header removed
   });
 });
